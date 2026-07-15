@@ -22,7 +22,7 @@
 # `<repository>` points at azl4-dev for local builds; koji overrides
 # this for distro builds).
 #
-# Capabilities and test-suites are identical between a canonical / `-dev`
+# Capabilities and tests are identical between a canonical / `-dev`
 # pair (the variants only differ in what `-repos` package ships and,
 # for `core`, the OCI tag).
 # ============================================================================
@@ -32,13 +32,10 @@
 [images.vm-base]
 description = "VM Base Image"
 definition = { type = "kiwi", path = "vm-base/vm-base.kiwi", profile = "vm-base" }
-tests.test-suites = [
-  { name = "static-image-checks" },
-  { name = "lisa-main" },
-  { name = "lisa-xfs" },
-  { name = "lisa-perf" },
-  { name = "lisa-smoke" },
-  { name = "lisa-kernel-ltp" },
+tests.tests = [
+    { name = "static-image-checks" },
+    { group = "vm-base-functional" },
+    { group = "vm-base-performance" },
 ]
 
 [images.vm-base.capabilities]
@@ -50,13 +47,10 @@ runtime-package-management = true
 [images.vm-base-dev]
 description = "VM Base Image (dev)"
 definition = { type = "kiwi", path = "vm-base/vm-base.kiwi", profile = "vm-base-dev" }
-tests.test-suites = [
-  { name = "static-image-checks" },
-  { name = "lisa-main" },
-  { name = "lisa-xfs" },
-  { name = "lisa-perf" },
-  { name = "lisa-smoke" },
-  { name = "lisa-kernel-ltp" },
+tests.tests = [
+    { name = "static-image-checks" },
+    { group = "vm-base-functional" },
+    { group = "vm-base-performance" },
 ]
 
 [images.vm-base-dev.capabilities]
@@ -70,7 +64,7 @@ runtime-package-management = true
 [images.minimal-os]
 description = "Minimal OS Image"
 definition = { type = "kiwi", path = "minimal-os/minimal-os.kiwi", profile = "minimal-os" }
-tests.test-suites = [
+tests.tests = [
   { name = "static-image-checks" },
 ]
 
@@ -83,7 +77,7 @@ runtime-package-management = true
 [images.minimal-os-dev]
 description = "Minimal OS Image (dev)"
 definition = { type = "kiwi", path = "minimal-os/minimal-os.kiwi", profile = "minimal-os-dev" }
-tests.test-suites = [
+tests.tests = [
   { name = "static-image-checks" },
 ]
 
@@ -97,7 +91,7 @@ runtime-package-management = true
 [images.container-base]
 description = "Container Base Image"
 definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "core" }
-tests.test-suites = [
+tests.tests = [
     { name = "static-image-checks" },
     { name = "runtime-container-tests" },
 ]
@@ -111,7 +105,7 @@ runtime-package-management = true
 [images.container-base-dev]
 description = "Container Base Image (dev)"
 definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "core-dev" }
-tests.test-suites = [
+tests.tests = [
     { name = "static-image-checks" },
     { name = "runtime-container-tests" },
 ]
@@ -129,7 +123,7 @@ runtime-package-management = true
 [images.container-distroless-minimal]
 description = "Container Distroless Minimal Image"
 definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "distroless-minimal" }
-tests.test-suites = [{ name = "static-image-checks" }]
+tests.tests = [{ name = "static-image-checks" }]
 
 [images.container-distroless-minimal.capabilities]
 machine-bootable = false
@@ -140,7 +134,7 @@ runtime-package-management = false
 [images.container-distroless-base]
 description = "Container Distroless Base Image"
 definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "distroless-base" }
-tests.test-suites = [{ name = "static-image-checks" }]
+tests.tests = [{ name = "static-image-checks" }]
 
 [images.container-distroless-base.capabilities]
 machine-bootable = false
@@ -151,7 +145,7 @@ runtime-package-management = false
 [images.container-distroless-debug]
 description = "Container Distroless Debug Image"
 definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "distroless-debug" }
-tests.test-suites = [{ name = "static-image-checks" }]
+tests.tests = [{ name = "static-image-checks" }]
 
 [images.container-distroless-debug.capabilities]
 machine-bootable = false
@@ -164,7 +158,7 @@ runtime-package-management = false
 [images.wsl]
 description = "WSL Image"
 definition = { type = "kiwi", path = "wsl/wsl.kiwi", profile = "wsl" }
-tests.test-suites = [{ name = "static-image-checks" }]
+tests.tests = [{ name = "static-image-checks" }]
 
 [images.wsl.capabilities]
 machine-bootable = false
@@ -175,7 +169,7 @@ runtime-package-management = true
 [images.wsl-dev]
 description = "WSL Image (dev)"
 definition = { type = "kiwi", path = "wsl/wsl.kiwi", profile = "wsl-dev" }
-tests.test-suites = [{ name = "static-image-checks" }]
+tests.tests = [{ name = "static-image-checks" }]
 
 [images.wsl-dev.capabilities]
 machine-bootable = false
@@ -188,71 +182,9 @@ runtime-package-management = true
 [images.vm-iso-installer]
 description = "VM ISO Installer"
 definition = { type = "kiwi", path = "vm-iso-installer/vm-iso-installer.kiwi", profile = "vm-iso-installer" }
+tests.tests = [{ name = "iso-install" }]
 
 [images.vm-iso-installer-dev]
 description = "VM ISO Installer (dev)"
 definition = { type = "kiwi", path = "vm-iso-installer/vm-iso-installer.kiwi", profile = "vm-iso-installer-dev" }
-
-# ============================================================================
-# Test suites
-# ============================================================================
-
-[test-suites.lisa-main]
-type = "lisa"
-description = "Lisa tests which are run by default"
-
-[test-suites.lisa-xfs]
-type = "lisa"
-description = "Lisa xfs tests"
-
-[test-suites.lisa-perf]
-type = "lisa"
-description = "Lisa perf tests"
-
-[test-suites.lisa-smoke]
-type = "lisa"
-description = "Lisa smoke tests"
-
-[test-suites.lisa-cvm]
-type = "lisa"
-description = "Lisa cvm tests"
-
-[test-suites.lisa-kernel-ltp]
-type = "lisa"
-description = "Lisa kernel LTP tests"
-
-# Single shared pytest suite for static (offline) image validation.
-[test-suites.static-image-checks]
-type = "pytest"
-description = "Offline image validation (shared + image-specific tests)"
-
-[test-suites.static-image-checks.pytest]
-working-dir = "tests"
-install = "pyproject"
-test-paths = ["cases/static/"]
-# {capabilities} is substituted by azldev as a comma-separated list of
-# the names of capabilities set to `true` for the image (e.g.
-# "machine-bootable,systemd,runtime-package-management"). Names use
-# the same dash-case form declared above. The pytest plugin parses
-# this string into a set; @pytest.mark.require_capability("...") tests
-# that don't match are skipped.
-extra-args = [
-    "--image-path", "{image-path}",
-    "--image-name", "{image-name}",
-    "--capabilities", "{capabilities}",
-]
-
-# Runtime container tests — validate live container behavior via podman.
-[test-suites.runtime-container-tests]
-type = "pytest"
-description = "Runtime container validation (exec into live containers)"
-
-[test-suites.runtime-container-tests.pytest]
-working-dir = "tests"
-install = "pyproject"
-test-paths = ["cases/runtime/"]
-extra-args = [
-    "--image-path", "{image-path}",
-    "--image-name", "{image-name}",
-    "--capabilities", "{capabilities}",
-]
+tests.tests = [{ name = "iso-install" }]

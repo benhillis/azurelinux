@@ -1,0 +1,30 @@
+# ============================================================================
+# bash — component-local test definitions
+# ============================================================================
+#
+# Fedora's bash dist-git ships a tmt plan at /plans/shell. We would pin the
+# tmt source to the *same* upstream commit that bash.comp.toml pins for the
+# spec, so the test plan moves in lockstep with the version of bash we
+# actually ship. (When the spec pin moves, this SHA moves with it.)
+#
+# NOT CURRENTLY WIRED: TEE (the runner in azl-testexecutionengine-service)
+# only knows how to execute `lisa`-type tests; there is no tmt executor. A
+# `type = "tmt"` definition is accepted by the azldev schema, but nothing
+# will ever run it, and referencing it from a component's `tests.tests`
+# would misreport coverage that doesn't exist. Left here, commented out, as
+# the reference shape for when tmt execution support lands. See
+# ../README.md ("Test wiring" section) for the general guidance.
+# ============================================================================
+
+# [tests.bash-fedora-shell]
+# type        = "tmt"
+# description = "Fedora bash dist-git tmt smoke (plans/shell), lock-stepped with the bash spec pin"
+# kind        = "functional"
+# # long-running omitted: virtual provision + a small shell plan finishes in minutes.
+#
+# [tests.bash-fedora-shell.tmt]
+# source = { git-url = "https://src.fedoraproject.org/rpms/bash.git", ref = "a6bcc6767229199f4f02b781d1d39df0835d894b" }
+# plan   = "/plans/shell"
+#
+# [tests.bash-fedora-shell.tmt.provision]
+# how = "virtual"

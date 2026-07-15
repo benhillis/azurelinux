@@ -4,6 +4,7 @@
 # source files live alongside this file in base/comps/kernel/. Edit
 # kernel.spec directly; AZL-specific changes are marked with "AZL:" comments.
 spec = { type = "local", path = "kernel.spec" }
+tests.tests = [{ group = "kernel-tests" }]
 
 # The spec uses %{specrelease} (kextraversion.azl_pkgrelease.dist) which the
 # auto-calculator cannot parse. Release is managed manually: bump azl_pkgrelease

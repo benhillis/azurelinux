@@ -1,4 +1,5 @@
 [components.kernel-headers]
+tests.tests = [{ group = "kernel-tests" }]
 # Kernel-headers using Fedora spec with overlays for Azure Linux 6.18.
 # Fedora's spec expects a pre-built headers tarball. These overlays adapt it to
 # use Azure Linux kernel source and generate headers during build.

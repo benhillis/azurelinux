@@ -1,0 +1,24 @@
+# ============================================================================
+# kernel-tests — shared test-group for kernel-shaped components
+# ============================================================================
+#
+# Bundles LISA kernel-oriented tests (LTP + XFS filesystem) into a stable
+# group name that kernel-adjacent components (kernel, kernel-headers, ...)
+# reference from their own <name>.comp.toml via:
+#
+#   tests.tests = [{ group = "kernel-tests" }]
+#
+# The underlying tests themselves are defined in
+# base/images/images.tests.toml. This file only declares the group identity
+# and its membership so component owners can opt in with a single line.
+#
+# File placement mirrors container-runtime.tests.toml: a flat root-level
+# cross-component test-group lives at base/comps/<topic>.tests.toml.
+# ============================================================================
+
+[test-groups.kernel-tests]
+description = "Kernel-oriented LISA coverage (LTP + XFS filesystem) for kernel-shaped components"
+tests = [
+    { name = "kernel-ltp" },
+    { name = "xfs-filesystem" },
+]
