@@ -115,6 +115,9 @@ Summary: The Linux kernel
 %endif
 
 # RHEL/CentOS specific .SBAT entries
+%if 0%{?azl4}
+%global sbat_suffix azurelinux
+%else
 %if 0%{?centos}
 %global sbat_suffix centos
 %else
@@ -122,6 +125,7 @@ Summary: The Linux kernel
 %global sbat_suffix fedora
 %else
 %global sbat_suffix rhel
+%endif
 %endif
 %endif
 
@@ -4578,6 +4582,9 @@ fi\
 
 # AZL-KMOD-FILES-ANCHOR — do not remove (kmod overlays chain here)
 %changelog
+* Tue Jul 28 2026 Lynsey Rydberg <lyrydber@microsoft.com> - 6.18.31-1.10
+- fix(kernel): identify EFI SBAT records as Azure Linux
+
 * Thu Jul 23 2026 Rachel Menge <rachelmenge@microsoft.com> - 6.18.31-1.9
 - feat(kernel): convert component to local spec
 
