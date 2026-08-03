@@ -23,7 +23,7 @@
 %global debug_package %{nil}
 %global __debug_package 1
 %global _binaries_in_noarch_packages_terminate_build 0
-%global __debug_install_post %{SOURCE100} %{efiarch} %{efialtarch}
+%global __debug_install_post %{SOURCE100} %{efiarch}
 %undefine _debuginfo_subpackages
 
 # currently here's what's in our dbx: nothing
@@ -31,7 +31,7 @@
 
 Name:		shim-unsigned-%{efiarch}
 Version:	15.8
-Release: 4%{?dist}
+Release: 6%{?dist}
 Summary:	First-stage UEFI bootloader
 ExclusiveArch:	x86_64
 License:	BSD-2-Clause AND OpenSSL
@@ -71,27 +71,12 @@ use this package or when debugging this package.
 %description
 %desc
 
-%package -n shim-unsigned-%{efialtarch}
-Summary:	First-stage UEFI bootloader (unsigned data)
-Provides:	bundled(openssl) = %{openssl_vre}
-
-%description -n shim-unsigned-%{efialtarch}
-%desc
-
 %package debuginfo
 Summary:	Debug information for shim-unsigned-%{efiarch}
 AutoReqProv:	0
 BuildArch:	noarch
 
 %description debuginfo
-%debug_desc
-
-%package -n shim-unsigned-%{efialtarch}-debuginfo
-Summary:	Debug information for shim-unsigned-%{efialtarch}
-AutoReqProv:	0
-BuildArch:	noarch
-
-%description -n shim-unsigned-%{efialtarch}-debuginfo
 %debug_desc
 
 %package debugsource
@@ -107,7 +92,7 @@ BuildArch:	noarch
 git config --unset user.email
 git config --unset user.name
 mkdir build-%{efiarch}
-mkdir build-%{efialtarch}
+
 cp %{SOURCE3} data/
 
 %build
@@ -131,6 +116,7 @@ make ${MAKEFLAGS} \
 	all
 cd ..
 
+%if 0
 cd build-%{efialtarch}
 setarch linux32 -B make ${MAKEFLAGS} \
 	ARCH=%{efialtarch} \
@@ -138,6 +124,7 @@ setarch linux32 -B make ${MAKEFLAGS} \
 	all
 cd ..
 
+%endif
 %install
 COMMIT_ID=5914984a1ffeab841f482c791426d7ca9935a5e6
 MAKEFLAGS="TOPDIR=.. -f ../Makefile COMMIT_ID=${COMMIT_ID} "
@@ -160,6 +147,7 @@ make ${MAKEFLAGS} \
 install -m 0644 BOOT*.CSV "${RPM_BUILD_ROOT}/%{shimdir}/"
 cd ..
 
+%if 0
 cd build-%{efialtarch}
 setarch linux32 make ${MAKEFLAGS} \
 	ARCH=%{efialtarch} \
@@ -169,6 +157,7 @@ setarch linux32 make ${MAKEFLAGS} \
 install -m 0644 BOOT*.CSV "${RPM_BUILD_ROOT}/%{shimaltdir}/"
 cd ..
 
+%endif
 ln -s %{version}-%{release} %{buildroot}%{_datadir}/shim/%{version}-2
 %files
 %license COPYRIGHT
@@ -180,18 +169,7 @@ ln -s %{version}-%{release} %{buildroot}%{_datadir}/shim/%{version}-2
 %{shimdir}/*.CSV
 
 %{_datadir}/shim/%{version}-2
-%files -n shim-unsigned-%{efialtarch}
-%license COPYRIGHT
-%dir %{shimrootdir}
-%dir %{shimversiondir}
-%dir %{shimaltdir}
-%{shimaltdir}/*.efi
-%{shimaltdir}/*.hash
-%{shimaltdir}/*.CSV
-
 %files debuginfo -f build-%{efiarch}/debugfiles.list
-
-%files -n shim-unsigned-%{efialtarch}-debuginfo -f build-%{efialtarch}/debugfiles.list
 
 %files debugsource -f build-%{efiarch}/debugsource.list
 

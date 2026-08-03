@@ -7,6 +7,16 @@ overlays = [
     { type = "spec-update-tag", tag = "Release", value = "2%{?dist}" },
 
     # Workaround: create a compat symlink that does not include the dist tag.
-    { type = "spec-append-lines", section = "%install", lines = ["ln -s %{version}-%{release} %{buildroot}%{_datadir}/shim/%{version}-2"] },
-    { type = "spec-append-lines", section = "%files", lines = ["%{_datadir}/shim/%{version}-2"] }
+    { type = "spec-append-lines", section = "%files", lines = ["%{_datadir}/shim/%{version}-2"] },
+
+    # Azure Linux does not support IA32. Omit its packages and skip its build
+    # and installation paths, which require the unsupported setarch -B call.
+    { type = "spec-remove-subpackage", package = "shim-unsigned-%{efialtarch}" },
+    { type = "spec-remove-subpackage", package = "shim-unsigned-%{efialtarch}-debuginfo" },
+    { type = "spec-search-replace", regex = '^%global __debug_install_post %{SOURCE100} %{efiarch} %{efialtarch}$', replacement = "%global __debug_install_post %{SOURCE100} %{efiarch}" },
+    { type = "spec-search-replace", section = "%prep", regex = '^mkdir build-%{efialtarch}$', replacement = "" },
+    { type = "spec-search-replace", section = "%build", regex = '^cd build-%{efialtarch}$', replacement = "%if 0\ncd build-%{efialtarch}" },
+    { type = "spec-append-lines", section = "%build", lines = ["%endif"] },
+    { type = "spec-search-replace", section = "%install", regex = '^cd build-%{efialtarch}$', replacement = "%if 0\ncd build-%{efialtarch}" },
+    { type = "spec-append-lines", section = "%install", lines = ["%endif", "ln -s %{version}-%{release} %{buildroot}%{_datadir}/shim/%{version}-2"] }
 ]
