@@ -24,14 +24,14 @@
 %package -n kmod-%{_kmod_name}
 Summary:        NVIDIA open GPU kernel modules (driver %{nvidia_open_version})
 Version:        %{nvidia_open_version}
-Release:        %{_azl_kver}.%{_azl_krel}
+Release:        %{nvidia_open_release}.%{_azl_kver}.%{_azl_krel}
 # Restore kernel NVR macros clobbered by the Version/Release tags above.
 %global version %{_azl_kver}
 %global release %{_azl_krel}
 AutoReq:        no
 # Track the actual NVIDIA driver version via Provides for dependency resolution.
 Provides:       nvidia-open-kmod-version = %{nvidia_open_version}
-Provides:       nvidia-kmod = %{nvidia_open_version}
+Provides:       nvidia-kmod = %{nvidia_open_version}-%{nvidia_open_release}
 # Mark this kmod as install-only so multiple versions can coexist alongside
 # their matching kernels (dnf/dnf5 default installonlypkgs includes the
 # 'installonlypkg(kernel-module)' token).
@@ -51,7 +51,7 @@ Each kernel version produces a separate kmod package
 (kmod-nvidia-open-<nvidia_driver_version>-<KVERREL>) so that multiple kernel versions
 can coexist with their own NVIDIA modules.
 Use 'Requires: nvidia-open-kmod-version = %{nvidia_open_version}' to depend on a
-specific NVIDIA driver version, or 'Requires: nvidia-kmod = %{nvidia_open_version}'.
+specific NVIDIA driver version, or 'Requires: nvidia-kmod = %{nvidia_open_version}-%{nvidia_open_release}'.
 %endif
 
 %endif

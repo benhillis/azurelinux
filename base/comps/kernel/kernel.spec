@@ -7,12 +7,13 @@
 # Azure Linux kernel build defines. These were previously injected via the
 # azldev-generated kernel.azl.macros file; they now live directly in the spec.
 # When rebuilding without a version change, bump azl_pkgrelease (manual release).
-%define azl_pkgrelease 14
+%define azl_pkgrelease 15
 # 4th version component from the AZL kernel source (6.18.31.1). Flows into
 # Release:, uname -r, and the /lib/modules/ path.
 %define kextraversion 1
 # NVIDIA open GPU kernel module version (built as a kmod subpackage).
-%define nvidia_open_version 595.58.03
+%define nvidia_open_version 610.57.04
+%define nvidia_open_release 1
 
 # All Global changes to build and install go here.
 # Per the below section about __spec_install_pre, any rpm
@@ -4606,6 +4607,9 @@ fi\
 
 # AZL-KMOD-FILES-ANCHOR — do not remove (kmod overlays chain here)
 %changelog
+* Wed Aug 12 2026 Elaheh Dehghani <edehghani@microsoft.com> - 6.18.31-1.15
+- feat(kmod-nvidia-open): upgrade to 610.57.04
+
 * Fri Aug 07 2026 Rachel Menge <rachelmenge@microsoft.com> - 6.18.31-1.14
 - feat(kernel): build base variants, keep UKI, and restore selftests
 
