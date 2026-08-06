@@ -1,5 +1,6 @@
 [components.shim-unsigned-aarch64]
-spec = { type = "upstream", upstream-distro = { name = "fedora", version = "43" }, upstream-commit = "67c1d520f9a8080f6b689714099f813f23154c8f" }
+# Pin shim 16.1 to Fedora dist-git commit 4db14e5ed7d3bdb7fda97f62c93e612435f2cce9.
+spec = { type = "upstream", upstream-distro = { name = "fedora", version = "44" }, upstream-commit = "4db14e5ed7d3bdb7fda97f62c93e612435f2cce9" }
 
 overlays = [
     # Workaround: add dist tag to the release to avoid NEVR conflicts
