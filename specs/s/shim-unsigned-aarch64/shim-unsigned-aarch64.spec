@@ -1,6 +1,8 @@
 # This spec file has been modified by azldev to include build configuration overlays.
 # Do not edit manually; changes may be overwritten.
 
+%global upstream_version_release 16.1-1.fc44
+
 %global pesign_vre 0.106-1
 %global openssl_vre 1.0.2j
 %global shim_commit_id afc49558b34548644c1cd0ad1b6526a9470182ed
@@ -30,7 +32,7 @@
 
 Name:		shim-unsigned-aarch64
 Version:	16.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary:	First-stage UEFI bootloader
 ExclusiveArch:	aarch64
 License:	BSD-2-Clause AND OpenSSL
@@ -40,7 +42,7 @@ Source1:	fedora-ca-20200709.cer
 %if 0%{?dbxfile}
 Source2:	%{dbxfile}
 %endif
-Source3:	sbat.redhat.csv.in
+Source3:	sbat.azurelinux.csv.in
 Source4:	shim.patches
 
 Source100:	shim-find-debuginfo.sh
@@ -94,6 +96,7 @@ git config --unset user.name
 mkdir build-%{efiarch}
 sed -e 's/@@VERSION@@/%{version}/g' \
     -e 's/@@RELEASE@@/%{release}/g' \
+    -e 's/@@UPSTREAM_VERSION_RELEASE@@/%{upstream_version_release}/g' \
     < %{SOURCE3} > data/sbat.redhat.csv
 
 %build

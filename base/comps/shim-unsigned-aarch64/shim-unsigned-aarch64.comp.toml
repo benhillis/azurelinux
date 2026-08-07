@@ -9,5 +9,14 @@ overlays = [
 
     # Workaround: create a compat symlink that does not include the dist tag.
     { type = "spec-append-lines", section = "%install", lines = ["ln -s %{version}-%{release} %{buildroot}%{_datadir}/shim/%{version}-2"] },
-    { type = "spec-append-lines", section = "%files", lines = ["%{_datadir}/shim/%{version}-2"] }
+    { type = "spec-append-lines", section = "%files", lines = ["%{_datadir}/shim/%{version}-2"] },
+
+    # Preserve the Fedora SBAT EVR and append the Azure Linux SBAT EVR.
+    { description = "Use the Fedora 16.1-1.fc44 EVR in the shim.fedora SBAT record", type = "file-search-replace", file = "sbat.redhat.csv.in", regex = '@@VERSION@@-@@RELEASE@@', replacement = '@@UPSTREAM_VERSION_RELEASE@@', metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
+    { description = "Add the Azure Linux shim SBAT record", type = "file-search-replace", file = "sbat.redhat.csv.in", regex = '\n\z', replacement = "\nshim.azurelinux,1,Microsoft,shim,@@VERSION@@-@@RELEASE@@,https://github.com/microsoft/azurelinux/issues\n", metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
+    { description = "Define the upstream Fedora shim EVR for SBAT substitution", type = "spec-prepend-lines", lines = ["%global upstream_version_release 16.1-1.fc44", ""], metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
+    { description = "Substitute the upstream Fedora shim EVR into SBAT", type = "spec-search-replace", section = "%prep", regex = '''^    -e 's/@@RELEASE@@/%{release}/g' \\$''', replacement = '''    -e 's/@@RELEASE@@/%{release}/g' \
+    -e 's/@@UPSTREAM_VERSION_RELEASE@@/%{upstream_version_release}/g' \''', metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
+    { description = "Rename the Azure Linux shim SBAT template", type = "file-rename", file = "sbat.redhat.csv.in", replacement = "sbat.azurelinux.csv.in", metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
+    { description = "Use the renamed Azure Linux SBAT template as Source3", type = "spec-search-replace", regex = 'sbat\.redhat\.csv\.in', replacement = "sbat.azurelinux.csv.in", metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } }
 ]
