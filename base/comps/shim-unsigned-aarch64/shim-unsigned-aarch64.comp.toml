@@ -18,5 +18,7 @@ overlays = [
     { description = "Substitute the upstream Fedora shim EVR into SBAT", type = "spec-search-replace", section = "%prep", regex = '''^    -e 's/@@RELEASE@@/%{release}/g' \\$''', replacement = '''    -e 's/@@RELEASE@@/%{release}/g' \
     -e 's/@@UPSTREAM_VERSION_RELEASE@@/%{upstream_version_release}/g' \''', metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
     { description = "Rename the Azure Linux shim SBAT template", type = "file-rename", file = "sbat.redhat.csv.in", replacement = "sbat.azurelinux.csv.in", metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
-    { description = "Use the renamed Azure Linux SBAT template as Source3", type = "spec-search-replace", regex = 'sbat\.redhat\.csv\.in', replacement = "sbat.azurelinux.csv.in", metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } }
+    { description = "Use the renamed Azure Linux SBAT template as Source3", type = "spec-search-replace", regex = 'sbat\.redhat\.csv\.in', replacement = "sbat.azurelinux.csv.in", metadata = { category = "azl-branding-policy", upstream-status = "inapplicable" } },
+    { description = "Stage the Azure Linux Secure Boot CA as the shim vendor certificate", type = "file-add", file = "azurelinux-ca-20230216.der", source = "azurelinux-ca-20230216.der", metadata = { category = "azl-security-compliance", upstream-status = "inapplicable" } },
+    { description = "Use the Azure Linux Secure Boot CA as shim Source1", type = "spec-search-replace", regex = 'fedora-ca-20200709\.cer', replacement = "azurelinux-ca-20230216.der", metadata = { category = "azl-security-compliance", upstream-status = "inapplicable" } }
 ]
