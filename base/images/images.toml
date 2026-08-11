@@ -93,6 +93,21 @@ container = false
 systemd = true
 runtime-package-management = true
 
+# ---- marketplace-gen1 --------------------------------------------------
+
+[images.marketplace-gen1]
+description = "Marketplace Gen1 Image (BIOS)"
+definition = { type = "kiwi", path = "marketplace-gen1/marketplace-gen1.kiwi" }
+tests.test-suites = [
+  { name = "static-image-checks" },
+]
+
+[images.marketplace-gen1.capabilities]
+machine-bootable = true
+container = false
+systemd = true
+runtime-package-management = true
+
 # ---- container-base (core profile) -------------------------------------
 [images.container-base]
 description = "Container Base Image"
