@@ -3,6 +3,7 @@ plus components whose spec tree was touched directly in the PR.
 
 Emits one component name per line on stdout (azldev dedupes internally).
 """
+from __future__ import annotations
 
 import argparse
 import json
@@ -53,7 +54,7 @@ def from_specs_diff(path: Path, specs_dir: Path, renderable: set[str]) -> list[s
         if not line.startswith(prefix):
             continue
         parts = line[len(prefix) :].split("/", 2)
-        if len(parts) >= 2 and parts[1]:
+        if len(parts) >= 2 and parts[1]:  # noqa: PLR2004 - layout is prefix/component
             name = parts[1]
             if name in renderable:
                 out.append(name)

@@ -53,6 +53,11 @@
           "title": "Undefined macros",
           "description": "Macro names to undefine when passing to the builder."
         },
+        "emit-upstream-provenance": {
+          "type": "boolean",
+          "title": "Emit upstream provenance macros",
+          "description": "Inject %fedora_upstream_version/release macros derived from the pristine upstream Fedora spec (Fedora upstream components only)."
+        },
         "check": {
           "$ref": "#/$defs/CheckConfig",
           "title": "Check configuration",
@@ -157,6 +162,11 @@
           "$ref": "#/$defs/ComponentPublishConfig",
           "title": "Publish settings",
           "description": "Component-level publish channel settings"
+        },
+        "tests": {
+          "$ref": "#/$defs/ComponentTestsConfig",
+          "title": "Tests",
+          "description": "Per-component test or test-group references"
         }
       },
       "additionalProperties": false,
@@ -341,6 +351,20 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "ComponentTestsConfig": {
+      "properties": {
+        "tests": {
+          "items": {
+            "$ref": "#/$defs/TestRef"
+          },
+          "type": "array",
+          "title": "Tests",
+          "description": "Per-component test or test-group references"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "ConfigFile": {
       "properties": {
         "$schema": {
@@ -419,13 +443,21 @@
           "title": "Package groups",
           "description": "Definitions of package groups for shared binary package configuration"
         },
-        "test-suites": {
+        "tests": {
           "additionalProperties": {
-            "$ref": "#/$defs/TestSuiteConfig"
+            "$ref": "#/$defs/TestDefinition"
           },
           "type": "object",
-          "title": "Test Suites",
-          "description": "Definitions of test suites for this project"
+          "title": "Tests",
+          "description": "Definitions of individual tests"
+        },
+        "test-groups": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TestGroup"
+          },
+          "type": "object",
+          "title": "Test Groups",
+          "description": "Definitions of named bundles of tests"
         }
       },
       "additionalProperties": false,
@@ -542,6 +574,11 @@
           "title": "Mock config file",
           "description": "Path to the aarch64 mock config file for this version"
         },
+        "kiwi-config-override": {
+          "type": "string",
+          "title": "KIWI config override",
+          "description": "Path to KIWI configuration overrides for this version"
+        },
         "inputs": {
           "$ref": "#/$defs/DistroVersionInputs",
           "title": "Inputs",
@@ -613,6 +650,26 @@
           "type": "boolean",
           "title": "Runtime package management",
           "description": "Whether the image supports installing or removing packages at runtime"
+        },
+        "wsl": {
+          "type": "boolean",
+          "title": "WSL",
+          "description": "Whether the image runs under the Windows Subsystem for Linux runtime"
+        },
+        "installer-media": {
+          "type": "boolean",
+          "title": "Installer media",
+          "description": "Whether the image is installer media that installs another OS rather than a directly runnable end-state image"
+        },
+        "fips-enabled": {
+          "type": "boolean",
+          "title": "FIPS enabled",
+          "description": "Whether the image is built or configured to run in FIPS mode"
+        },
+        "cvm": {
+          "type": "boolean",
+          "title": "Confidential VM",
+          "description": "Whether the image supports running as a Confidential VM (CVM)"
         }
       },
       "additionalProperties": false,
@@ -644,6 +701,18 @@
           "$ref": "#/$defs/ImagePublishConfig",
           "title": "Publish settings",
           "description": "Publishing settings for this image"
+        },
+        "architectures": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "x86_64",
+              "aarch64"
+            ]
+          },
+          "type": "array",
+          "title": "Architectures",
+          "description": "Architectures supported by this image (optional; unset means unrestricted)"
         }
       },
       "additionalProperties": false,
@@ -697,13 +766,13 @@
     },
     "ImageTestsConfig": {
       "properties": {
-        "test-suites": {
+        "tests": {
           "items": {
-            "$ref": "#/$defs/TestSuiteRef"
+            "$ref": "#/$defs/TestRef"
           },
           "type": "array",
-          "title": "Test Suites",
-          "description": "List of test suite references that apply to this image"
+          "title": "Tests",
+          "description": "List of test or test-group references that apply to this image"
         }
       },
       "additionalProperties": false,
@@ -715,7 +784,8 @@
           "type": "string",
           "enum": [
             "download",
-            "custom"
+            "custom",
+            "overlay"
           ],
           "title": "Origin type",
           "description": "Type of origin for this source file"
@@ -731,7 +801,7 @@
         "script": {
           "type": "string",
           "title": "Script",
-          "description": "Shell script filename (relative to the component spec directory) to run in mock to generate this source file. Required when origin type is 'custom'."
+          "description": "Plain shell script filename with no path separators. Relative to the declaring config file for upstream components or the component spec directory for local components. Required when origin type is 'custom'."
         },
         "mock-packages": {
           "items": {
@@ -939,43 +1009,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "PytestConfig": {
-      "properties": {
-        "working-dir": {
-          "type": "string",
-          "title": "Working directory",
-          "description": "Directory to use as CWD when running pytest"
-        },
-        "test-paths": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "title": "Test paths",
-          "description": "Test file paths or directories passed to pytest. Glob patterns are expanded."
-        },
-        "extra-args": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "title": "Extra arguments",
-          "description": "Additional arguments passed to pytest. Use {image-path} as a placeholder for the image path."
-        },
-        "install": {
-          "type": "string",
-          "enum": [
-            "pyproject",
-            "requirements",
-            "none"
-          ],
-          "title": "Install mode",
-          "description": "How to install Python dependencies: pyproject, requirements, or none (default)"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "ReleaseConfig": {
       "properties": {
         "calculation": {
@@ -1148,6 +1181,11 @@
           "title": "Disable GPG check",
           "description": "Opt out of GPG signature verification for repos in this set"
         },
+        "disable-ssl-verify": {
+          "type": "boolean",
+          "title": "Disable SSL verification",
+          "description": "Disable TLS certificate verification for repos in this set"
+        },
         "arches": {
           "items": {
             "type": "string"
@@ -1312,26 +1350,150 @@
         "subpath"
       ]
     },
-    "TestSuiteConfig": {
-      "properties": {
-        "description": {
-          "type": "string",
-          "title": "Description",
-          "description": "Description of this test suite"
+    "TestDefinition": {
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "pytest"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "lisa"
+                  ]
+                },
+                {
+                  "required": [
+                    "tmt"
+                  ]
+                }
+              ]
+            },
+            "required": [
+              "pytest"
+            ]
+          }
         },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "lisa"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "pytest"
+                  ]
+                },
+                {
+                  "required": [
+                    "tmt"
+                  ]
+                }
+              ]
+            },
+            "required": [
+              "lisa"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tmt"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "pytest"
+                  ]
+                },
+                {
+                  "required": [
+                    "lisa"
+                  ]
+                }
+              ]
+            },
+            "required": [
+              "tmt"
+            ]
+          }
+        }
+      ],
+      "properties": {
         "type": {
           "type": "string",
           "enum": [
             "pytest",
-            "lisa"
+            "lisa",
+            "tmt"
           ],
           "title": "Type",
-          "description": "Type of test framework (pytest or lisa)"
+          "description": "Test framework type"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description",
+          "description": "Description of this test"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "functional",
+            "performance"
+          ],
+          "title": "Kind",
+          "description": "Kind hint for the test"
+        },
+        "long-running": {
+          "type": "boolean",
+          "title": "Long running",
+          "description": "Hints that this test may run for hours"
+        },
+        "metrics-enabled": {
+          "type": "boolean",
+          "title": "Metrics enabled",
+          "description": "Hints to the test execution environment/validation service whether metrics from this test should be collected and stored"
+        },
+        "required-capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Required capabilities",
+          "description": "Capability tokens the image must declare"
+        },
+        "lisa": {
+          "type": "object",
+          "title": "LISA config",
+          "description": "LISA-specific configuration"
+        },
+        "tmt": {
+          "type": "object",
+          "title": "TMT config",
+          "description": "TMT-specific configuration"
         },
         "pytest": {
-          "$ref": "#/$defs/PytestConfig",
+          "type": "object",
           "title": "Pytest config",
-          "description": "Pytest-specific configuration (required when type is pytest)"
+          "description": "pytest-specific configuration"
         }
       },
       "additionalProperties": false,
@@ -1340,19 +1502,82 @@
         "type"
       ]
     },
-    "TestSuiteRef": {
+    "TestGroup": {
       "properties": {
-        "name": {
+        "description": {
           "type": "string",
-          "title": "Name",
-          "description": "Name of the test suite (must match a key in [test-suites])"
+          "title": "Description",
+          "description": "Description of this test group"
+        },
+        "tests": {
+          "items": {
+            "not": {
+              "required": [
+                "group"
+              ]
+            },
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^\\S",
+                "description": "Name of a test"
+              }
+            },
+            "type": "object",
+            "required": [
+              "name"
+            ]
+          },
+          "type": "array",
+          "title": "Tests",
+          "description": "Ordered test references for this group (name only)"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "name"
-      ]
+      "type": "object"
+    },
+    "TestRef": {
+      "oneOf": [
+        {
+          "not": {
+            "required": [
+              "group"
+            ]
+          },
+          "required": [
+            "name"
+          ]
+        },
+        {
+          "not": {
+            "required": [
+              "name"
+            ]
+          },
+          "required": [
+            "group"
+          ]
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^\\S",
+          "title": "Name",
+          "description": "Name of a test (mutually exclusive with group)"
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^\\S",
+          "title": "Group",
+          "description": "Name of a test group (mutually exclusive with name)"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "ToolsConfig": {
       "properties": {

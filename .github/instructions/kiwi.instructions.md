@@ -8,38 +8,32 @@ Kiwi files define Azure Linux image builds. They use the [KIWI NG](https://osins
 
 ## How images are registered
 
-Images are defined in `base/images/images.toml`. Each image is
-declared as a canonical (unsuffixed) entry plus a `-dev` variant,
-each selecting the matching kiwi `profile`:
+Images are defined in `base/images/images.toml`. Most images select a leaf
+profile from the shared `base/images/AzureLinux.kiwi` description:
 
 ```toml
 [images.container-base]
 description = "Container Base Image"
-definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "core" }
-
-[images.container-base-dev]
-description = "Container Base Image (dev)"
-definition = { type = "kiwi", path = "container-base/container-base.kiwi", profile = "core-dev" }
+definition = { type = "kiwi", path = "AzureLinux.kiwi", profile = "core" }
 ```
 
-The two variants share the same kiwi description; they differ only
-in which `azurelinux-repos*` package is shipped (controlling where
-the resulting OS points at runtime), and — for the `core` container
-specifically — the OCI tag (`:4.0` + `:latest` for canonical,
-`:4.0-dev` for the dev variant). Both variants build their RPMs
-from the same source (the kiwi `<repository>`); koji overrides this
-during distro builds.
+`AzureLinux.kiwi` includes reusable fragments from `repositories/`,
+`components/`, and `teams/`. Includes remain flat in the root description;
+profile requirements express inheritance between fragments.
 
-Distroless container images strip the package manager entirely, so
-they ship no `-repos` package and have only a single (canonical)
-entry — there's no `-dev` sibling because it would be byte-identical.
+Shared KIWI hook scripts and `<file>` sources live directly under
+`base/images/`, because that directory is the shared description root. The root
+`config.sh` dispatches profile-specific behavior using `kiwi_profiles`,
+following Fedora's shared-description model. `<file>` entries remain scoped to
+the owning profile so their payloads do not leak into other images.
 
-Each image has its own directory under `base/images/` containing the
-`.kiwi` file.
+The ISO installer remains a standalone description under
+`base/images/vm-iso-installer/` because its distinct composition and workflow
+do not fit naturally into the shared image hierarchy.
 
 ## Image types
 
-- **Container** (`image="docker"`): OCI container images with `<containerconfig>` for name, tag, entrypoint
+- **Container** (`image="oci"`): OCI container images with `<containerconfig>` for name, tag, entrypoint
 - **VM** (`image="oem"`): Virtual machine images with disk format (`vhdx`, `qcow2`), filesystem, bootloader, and partition config
 
 ## Key elements

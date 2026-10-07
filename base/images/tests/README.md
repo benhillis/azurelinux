@@ -6,9 +6,11 @@ container) tests, all driven by pytest.
 
 ## How it gets invoked
 
-These tests are wired into `azldev` via the `[test-suites.*]` tables
-in `base/images/images.toml`, and referenced by each image's
-`tests.test-suites`. The standard entry point is:
+These tests are wired into `azldev` via the `[tests.*]` and
+`[test-groups.*]` tables in `base/images/images.tests.toml`, and
+referenced by each image's `tests.tests` in `base/images/images.toml`
+(e.g. `tests.tests = [{ name = "static-image-checks" }, { group = "..." }]`).
+The standard entry point is:
 
 ```bash
 azldev image build vm-base
@@ -21,13 +23,26 @@ azldev image build wsl
 azldev image test  wsl
 ```
 
-(Most images come in two variants. The canonical/unsuffixed name
-ships `azurelinux-repos` so the resulting OS points at PMC's
-`azurelinux/4.0/beta` repo at runtime; the `-dev` variant ships
-`azurelinux-repos-dev` so the OS points at the azl4-dev blob.
-Distroless container images strip the package manager entirely and
-have only the canonical entry. Append `-dev` to the image name —
-where present — to validate the dev variant.)
+Images with runtime package management ship `azurelinux-repos`, which defines
+the repositories available in the resulting OS. These runtime repositories are
+independent of the package sources used to build the image. Distroless
+container images strip the package manager and do not ship a repository package.
+
+Production Base, Cloud Native, and Microsoft binary repositories are enabled by
+default. All Preview, source, and debuginfo repositories are disabled. Static
+repository checks enforce these defaults on every image with the
+`runtime-package-management` capability; container runtime checks also exercise
+Production package resolution and transactions.
+
+Preview remains available through explicit opt-in, for example:
+
+```bash
+dnf --enable-repo=azurelinux-preview-base install <package>
+```
+
+This enables Preview for that command only; it does not change the persisted
+defaults. Existing systems with locally modified repo files retain their
+configuration because the package uses `%config(noreplace)`.
 
 `azldev` creates a per-suite Python venv, installs this directory's
 `pyproject.toml`, and invokes pytest with the right `--image-path`,
@@ -35,8 +50,8 @@ where present — to validate the dev variant.)
 
 ## Test suites
 
-| Suite | Description | Runs for |
-|-------|-------------|----------|
+| Test | Description | Runs for |
+|------|-------------|----------|
 | `static-image-checks` | Offline filesystem validation — mounts images read-only | All images |
 | `runtime-container-tests` | Live container tests via `podman exec` | Container images |
 
@@ -112,7 +127,8 @@ needed for the current `--image-type` is missing.
 
 ```
 base/images/
-├── images.toml                          # Image registry + test-suite wiring
+├── images.toml                          # Image registry + tests.tests wiring
+├── images.tests.toml                    # [tests.*] / [test-groups.*] catalog
 └── tests/
     ├── pyproject.toml                   # uv project: pytest + python-on-whales deps
     ├── conftest.py                      # Session fixtures (static + runtime)
@@ -179,9 +195,8 @@ base/images/
     image family (the plugin applies `@pytest.mark.image("<dir>")`
     during collection — no boilerplate per file or per subdir). The
     directory name is treated as a *family*: an `--image-name` matches
-    the family if it equals the family exactly OR has the form
-    `<family>-<variant>` (so `cases/static/vm-base/` runs for both
-    `vm-base` and `vm-base-dev`).
+    the family if it equals the family exactly or has the form
+    `<family>-<variant>`.
 - **Shared runtime (every container):** add a `cases/runtime/test_<topic>.py`.
     Use `container_exec_shell("...")` for normal runtime tests. Use
     `container_exec([...])` only when the test must avoid a shell, such as

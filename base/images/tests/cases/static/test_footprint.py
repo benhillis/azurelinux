@@ -14,10 +14,13 @@ wsl); it skips for VM images, which ship a provisioned raw disk.
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterable
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,7 @@ _LARGEST_PACKAGES_TO_LOG = 15
 
 
 def _family_of(image_name: str, known: Iterable[str]) -> str | None:
-    """Map an ``--image-name`` to its family (e.g. ``container-base-dev`` → ``container-base``)."""
+    """Map an ``--image-name`` to its family, including optional suffixed variants."""
     for family in known:
         if image_name == family or image_name.startswith(family + "-"):
             return family

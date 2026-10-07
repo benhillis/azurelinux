@@ -47,14 +47,15 @@ import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
+from http import HTTPStatus
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING
 
 import createrepo_c as cr
 
 # `_repo_layout` is a sibling module in this directory.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _repo_layout import (  # noqa: E402
+from _repo_layout import (
     ALL_KINDS,
     CHANNELS,
     KIND_DEBUGINFO,
@@ -62,6 +63,9 @@ from _repo_layout import (  # noqa: E402
     KIND_SRPMS,
     SUBREPOS,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # Repo root: this file lives at <repo>/scripts/repo/<name>.py, so the
 # project root is three parents up.
@@ -78,6 +82,8 @@ USER_AGENT = "synthesize-repodata/1"
 HTTP_TIMEOUT = 60.0
 HTTP_RETRIES = 3
 HTTP_BACKOFF_BASE = 1.0  # seconds; doubled per attempt.
+HTTP_SERVER_ERROR_MIN = HTTPStatus.INTERNAL_SERVER_ERROR
+HTTP_SERVER_ERROR_MAX = 600
 
 # repomd record types we generate ourselves in the output. The synth
 # tool only emits these — auxiliary records (updateinfo, group,
@@ -230,14 +236,13 @@ def parse_explicit_repo(spec: str, arches: Iterable[str]) -> list[InputRepo]:
 def dedup_input_repos(repos: Iterable[InputRepo]) -> list[InputRepo]:
     """Drop duplicate (kind, arch, url) entries, preserving order. Explicit
     origin wins over prefix origin so 404s remain fatal where the user asked
-    for them explicitly."""
+    for them explicitly.
+    """
     seen: dict[tuple[str, str, str], InputRepo] = {}
     for r in repos:
         key = (r.kind, r.arch, r.url)
         existing = seen.get(key)
-        if existing is None:
-            seen[key] = r
-        elif r.origin == "explicit" and existing.origin == "prefix":
+        if existing is None or (r.origin == "explicit" and existing.origin == "prefix"):
             seen[key] = r
     return list(seen.values())
 
@@ -279,7 +284,7 @@ def _http_get(
                 shutil.copyfileobj(resp, fh)
             return
         except urllib.error.HTTPError as e:
-            if 500 <= e.code < 600 and attempt < retries - 1:
+            if HTTP_SERVER_ERROR_MIN <= e.code < HTTP_SERVER_ERROR_MAX and attempt < retries - 1:
                 last_exc = e
                 log(f"    HTTP {e.code} fetching {url}; retrying")
                 time.sleep(HTTP_BACKOFF_BASE * (2**attempt))
@@ -353,8 +358,8 @@ def download_repo_metadata(
     try:
         _http_get(repomd_url, repomd_path, ssl_context)
     except urllib.error.HTTPError as e:
-        if e.code == 404 and repo.origin == "prefix":
-            log(f"    -> 404, skipping (prefix-derived, non-fatal)")
+        if e.code == HTTPStatus.NOT_FOUND and repo.origin == "prefix":
+            log("    -> 404, skipping (prefix-derived, non-fatal)")
             shutil.rmtree(cache_dir, ignore_errors=True)
             return None
         raise
@@ -364,7 +369,7 @@ def download_repo_metadata(
         # that as the local-fs equivalent so prefix-derived sub-repos
         # under ``file://`` fixtures are silently skipped just like 404s.
         if isinstance(e.reason, FileNotFoundError) and repo.origin == "prefix":
-            log(f"    -> not found, skipping (prefix-derived, non-fatal)")
+            log("    -> not found, skipping (prefix-derived, non-fatal)")
             shutil.rmtree(cache_dir, ignore_errors=True)
             return None
         raise
@@ -409,7 +414,8 @@ UniverseKey = tuple[str, str, str, str, str, str, str]
 @dataclass
 class UniverseEntry:
     """One NEVRA slot in the unioned package universe (one entry per
-    distinct package version)."""
+    distinct package version).
+    """
 
     repo: InputRepo
     source_pkg_name: str  # extracted from rpm_sourcerpm (or pkg name for srpms)
@@ -439,19 +445,19 @@ def _strip_srpm_suffix(rpm_sourcerpm: str | None) -> str:
     if not rpm_sourcerpm:
         return ""
     s = rpm_sourcerpm
-    if s.endswith(".src.rpm"):
-        s = s[: -len(".src.rpm")]
+    s = s.removesuffix(".src.rpm")
     # Strip -release then -version (best-effort; matches the inspiration
     # script's approach).
     parts = s.rsplit("-", 2)
-    if len(parts) >= 3:
+    if len(parts) >= 3:  # noqa: PLR2004 - split yields name, version, release
         return parts[0]
     return s
 
 
 def _find_metadata_path(repo_dir: Path, kind: str) -> str:
     """Return the absolute path of *kind* (primary|filelists|other) for the
-    cached repo at *repo_dir*."""
+    cached repo at *repo_dir*.
+    """
     repomd = cr.Repomd()
     cr.xml_parse_repomd(str(repo_dir / "repodata" / "repomd.xml"), repomd, lambda *_: True)
     for rec in repomd.records:
@@ -602,7 +608,7 @@ def query_azldev(
         rtype = row.get("type", "")
         component = row.get("component", "") or ""
         raw_channel = row.get("publishChannel", "") or ""
-        channel = raw_channel[len(CHANNEL_PREFIX) :] if raw_channel.startswith(CHANNEL_PREFIX) else raw_channel
+        channel = raw_channel.removeprefix(CHANNEL_PREFIX)
         if component and component not in known_components:
             # Foreign package: azldev synthesised a default channel for
             # something not actually built by AZL. Track and skip.
@@ -632,7 +638,8 @@ def query_azldev(
 @dataclass
 class RoutingDecision:
     """Per-universe-entry decision: where the package should land, or why
-    it was excluded."""
+    it was excluded.
+    """
 
     dest_channel: str | None = None  # 'base' | 'sdk' | None (=excluded)
     reason: str = ""  # human-readable provenance

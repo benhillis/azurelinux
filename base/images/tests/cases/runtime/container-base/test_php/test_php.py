@@ -9,14 +9,17 @@ the built-in PHP web server and verifies a zip round-trip via router.php.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from utils.container_runtime import AssertHttpServer, ExecShell
+
+if TYPE_CHECKING:
+    from utils.container_runtime import AssertHttpServer, ExecShell
 
 EXPECTED_RESPONSE = (Path(__file__).with_name("response.txt")).read_text().strip()
 
 
-@pytest.mark.dockerfile()
+@pytest.mark.dockerfile
 def test_php_version(container_exec_shell: ExecShell) -> None:
     """PHP interpreter must be present and report a version."""
     result = container_exec_shell("php --version")
@@ -24,7 +27,7 @@ def test_php_version(container_exec_shell: ExecShell) -> None:
     assert "PHP" in result.output
 
 
-@pytest.mark.dockerfile()
+@pytest.mark.dockerfile
 def test_php_zip_extension_loaded(container_exec_shell: ExecShell) -> None:
     """The zip extension must be loaded in the PHP runtime."""
     result = container_exec_shell("php -m")
@@ -32,7 +35,7 @@ def test_php_zip_extension_loaded(container_exec_shell: ExecShell) -> None:
     assert "zip" in result.output
 
 
-@pytest.mark.dockerfile()
+@pytest.mark.dockerfile
 def test_php_http_server(assert_http_server: AssertHttpServer) -> None:
     """The built-in PHP server must serve a successful zip round-trip."""
     assert_http_server(

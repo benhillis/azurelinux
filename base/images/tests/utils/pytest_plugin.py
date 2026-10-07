@@ -182,8 +182,8 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     # image: skip if --image-name doesn't match the marker's family.
     # Family matching: the marker's value is treated as a family name that
     # matches an image-name exactly OR matches a `<family>-<variant>` name
-    # (e.g. ``image("vm-base")`` matches both ``vm-base`` and
-    # ``vm-base-dev``). This lets tests under ``cases/<family>/`` apply
+    # (e.g. ``image("marketplace-gen2")`` matches both ``marketplace-gen2``
+    # and ``marketplace-gen2-fips``). This lets tests under ``cases/<family>/`` apply
     # to every variant of an image without per-variant duplication.
     image_name = item.config.getoption("--image-name", default=None)
     for marker in item.iter_markers("image"):
@@ -246,6 +246,6 @@ def pytest_collection_modifyitems(config, items) -> None:  # type: ignore[no-unt
         # Auto-apply image() marker if there's an image-family subdir.
         # e.g. cases/static/vm-base/test_kernel.py → image("vm-base")
         #      cases/runtime/container-base/test_foo.py → image("container-base")
-        if len(remaining) >= 3:  # category + family_dir + file
+        if len(remaining) >= 3:  # noqa: PLR2004 - category + family_dir + file
             image_dir = remaining[1]
             item.add_marker(pytest.mark.image(image_dir))

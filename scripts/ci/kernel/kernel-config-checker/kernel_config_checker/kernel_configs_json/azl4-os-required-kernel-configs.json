@@ -3,6 +3,54 @@
     "name": "default",
     "kernel_configs": [
       {
+        "name": "CONFIG_BT",
+        "values": [
+          { "architecture": "x86_64", "value": "n" },
+          { "architecture": "arm64", "value": "n" }
+        ],
+        "justification": "Keep Bluetooth disabled on both Azure Linux kernel architectures."
+      },
+      {
+        "name": "CONFIG_WLAN_VENDOR_INTEL",
+        "values": [
+          { "architecture": "x86_64", "value": "n" },
+          { "architecture": "arm64", "value": "n" }
+        ],
+        "justification": "Keep Intel Wi-Fi disabled on both Azure Linux kernel architectures."
+      },
+      {
+        "name": "CONFIG_WLAN",
+        "values": [
+          { "architecture": "x86_64", "value": "n" },
+          { "architecture": "arm64", "value": "n" }
+        ],
+        "justification": "Keep WLAN drivers disabled on both Azure Linux kernel architectures."
+      },
+      {
+        "name": "CONFIG_USB_VIDEO_CLASS",
+        "values": [
+          { "architecture": "x86_64", "value": "n" },
+          { "architecture": "arm64", "value": "n" }
+        ],
+        "justification": "Keep USB webcams disabled on both Azure Linux kernel architectures."
+      },
+      {
+        "name": "CONFIG_ACPI_AC",
+        "values": [
+          { "architecture": "x86_64", "value": "n" },
+          { "architecture": "arm64", "value": "n" }
+        ],
+        "justification": "Keep laptop AC adapters disabled on both Azure Linux kernel architectures."
+      },
+      {
+        "name": "CONFIG_ACPI_BATTERY",
+        "values": [
+          { "architecture": "x86_64", "value": "n" },
+          { "architecture": "arm64", "value": "n" }
+        ],
+        "justification": "Keep laptop batteries disabled on both Azure Linux kernel architectures."
+      },
+      {
         "name": "CONFIG_AMD_MEM_ENCRYPT",
         "values": [
           {
@@ -69,6 +117,16 @@
           }
         ],
         "justification": "Needed for kernel upgrade 5.15.123.1 - PR: https://github.com/microsoft/azurelinux/pull/5916"
+      },
+      {
+        "name": "CONFIG_ARM64_ERRATUM_4118414",
+        "values": [
+          {
+            "architecture": "arm64",
+            "value": "y"
+          }
+        ],
+        "justification": "Mitigation for CVE-2025-10263 (completion of affected memory accesses may be observed out of order on affected Arm cores) - https://nvd.nist.gov/vuln/detail/CVE-2025-10263"
       },
       {
         "name": "CONFIG_ARM64_WORKAROUND_TSB_FLUSH_FAILURE",
@@ -319,6 +377,20 @@
           }
         ],
         "justification": "Needed to see early logging in serial console - PR: https://github.com/microsoft/azurelinux/pull/6888"
+      },
+      {
+        "name": "CONFIG_CRAMFS",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Ensure cramfs kernel module is not available - https://dev.azure.com/mariner-org/mariner/_workitems/edit/22846"
       },
       {
         "name": "CONFIG_CRYPTO",
@@ -651,6 +723,20 @@
           }
         ],
         "justification": "https://dev.azure.com/mariner-org/mariner/_workitems/edit/22294"
+      },
+      {
+        "name": "CONFIG_CRYPTO_XXHASH",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Remove xxhash64 from the Crypto API - https://dev.azure.com/mariner-org/mariner/_workitems/edit/23422"
       },
       {
         "name": "CONFIG_CUSE",
@@ -1127,6 +1213,34 @@
         "justification": "https://microsoft.visualstudio.com/OS/_workitems/edit/51595441"
       },
       {
+        "name": "CONFIG_FIREWIRE",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Ensure firewire-core kernel module is not available - https://dev.azure.com/mariner-org/mariner/_workitems/edit/22850"
+      },
+      {
+        "name": "CONFIG_FIREWIRE_NOSY",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Ensure firewire-core kernel module is not available - https://dev.azure.com/mariner-org/mariner/_workitems/edit/22850"
+      },
+      {
         "name": "CONFIG_FPGA_DFL_AFU",
         "values": [
           {
@@ -1183,6 +1297,34 @@
           }
         ],
         "justification": "Needed for Mellanox DPUs - PR: https://github.com/microsoft/azurelinux/pull/5896"
+      },
+      {
+        "name": "CONFIG_HFSPLUS_FS",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Ensure hfsplus kernel module is not available - https://dev.azure.com/mariner-org/mariner/_workitems/edit/22849"
+      },
+      {
+        "name": "CONFIG_HFS_FS",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Ensure hfs kernel module is not available - https://dev.azure.com/mariner-org/mariner/_workitems/edit/22848"
       },
       {
         "name": "CONFIG_HIBERNATION",
@@ -2781,6 +2923,34 @@
         "justification": "https://microsoft.visualstudio.com/OS/_workitems/edit/52468301"
       },
       {
+        "name": "CONFIG_USB_NET_AX88179_178A",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "m"
+          },
+          {
+            "architecture": "arm64",
+            "value": "m"
+          }
+        ],
+        "justification": "Enable ASIX AX88179/178A USB Ethernet adapters - Work item: https://dev.azure.com/mariner-org/mariner/_workitems/edit/23845"
+      },
+      {
+        "name": "CONFIG_USB_NET_CDC_NCM",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "m"
+          },
+          {
+            "architecture": "arm64",
+            "value": "m"
+          }
+        ],
+        "justification": "Enable CDC NCM USB Ethernet adapters - Work item: https://dev.azure.com/mariner-org/mariner/_workitems/edit/23845"
+      },
+      {
         "name": "CONFIG_USB_SERIAL_CH341",
         "values": [
           {
@@ -2795,6 +2965,20 @@
         "justification": "https://microsoft.visualstudio.com/OS/_workitems/edit/52468301"
       },
       {
+        "name": "CONFIG_USB_STORAGE",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "m"
+          },
+          {
+            "architecture": "arm64",
+            "value": "m"
+          }
+        ],
+        "justification": "Enable standard USB mass-storage devices - Work item: https://dev.azure.com/mariner-org/mariner/_workitems/edit/23493"
+      },
+      {
         "name": "CONFIG_USB_TMC",
         "values": [
           {
@@ -2807,6 +2991,20 @@
           }
         ],
         "justification": "https://microsoft.visualstudio.com/OS/_workitems/edit/52967503"
+      },
+      {
+        "name": "CONFIG_USB_UAS",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "m"
+          },
+          {
+            "architecture": "arm64",
+            "value": "m"
+          }
+        ],
+        "justification": "Enable USB Attached SCSI devices - Work item: https://dev.azure.com/mariner-org/mariner/_workitems/edit/23493"
       },
       {
         "name": "CONFIG_USER_EVENTS",
@@ -2879,6 +3077,20 @@
           }
         ],
         "justification": "Needed to see logs in Azure serial console - PR: https://github.com/microsoft/azurelinux/pull/3264"
+      },
+      {
+        "name": "CONFIG_VXFS_FS",
+        "values": [
+          {
+            "architecture": "x86_64",
+            "value": "n"
+          },
+          {
+            "architecture": "arm64",
+            "value": "n"
+          }
+        ],
+        "justification": "Ensure freevxfs kernel module is not available - https://dev.azure.com/mariner-org/mariner/_workitems/edit/22847"
       },
       {
         "name": "CONFIG_WIREGUARD",
@@ -3025,6 +3237,16 @@
           "justification": "Enable firmware-first hardware error reporting through ACPI APEI GHES on x86_64 - Work item: https://microsoft.visualstudio.com/OS/_workitems/edit/63295066"
         },
         {
+          "name": "CONFIG_USB_NET_RNDIS_HOST",
+          "values": [
+            {
+              "architecture": "x86_64",
+              "value": "m"
+            }
+          ],
+          "justification": "https://microsoft.visualstudio.com/OS/_workitems/edit/62487471"
+        },
+        {
           "name": "CONFIG_DRM_ACCEL_IVPU",
           "values": [
             {
@@ -3095,14 +3317,70 @@
           "values": [
             {
               "architecture": "x86_64",
-              "value": "n"
+              "value": "m"
             },
             {
               "architecture": "arm64",
-              "value": "n"
+              "value": "m"
             }
           ],
-          "justification": "Align kernel 6.18 with its generated configuration"
+          "justification": "Provide BBRv3 congestion control as an optional module on Azure Linux 4.0"
+        },
+        {
+          "name": "CONFIG_TYPEC",
+          "values": [
+            {
+              "architecture": "x86_64",
+              "value": "m"
+            },
+            {
+              "architecture": "arm64",
+              "value": "m"
+            }
+          ],
+          "justification": "Require USB Type-C and UCSI support on x86_64 and arm64 - PR: https://github.com/microsoft/azurelinux/pull/18300"
+        },
+        {
+          "name": "CONFIG_TYPEC_DP_ALTMODE",
+          "values": [
+            {
+              "architecture": "x86_64",
+              "value": "m"
+            },
+            {
+              "architecture": "arm64",
+              "value": "m"
+            }
+          ],
+          "justification": "Require USB Type-C and UCSI support on x86_64 and arm64 - PR: https://github.com/microsoft/azurelinux/pull/18300"
+        },
+        {
+          "name": "CONFIG_TYPEC_UCSI",
+          "values": [
+            {
+              "architecture": "x86_64",
+              "value": "m"
+            },
+            {
+              "architecture": "arm64",
+              "value": "m"
+            }
+          ],
+          "justification": "Require USB Type-C and UCSI support on x86_64 and arm64 - PR: https://github.com/microsoft/azurelinux/pull/18300"
+        },
+        {
+          "name": "CONFIG_UCSI_ACPI",
+          "values": [
+            {
+              "architecture": "x86_64",
+              "value": "m"
+            },
+            {
+              "architecture": "arm64",
+              "value": "m"
+            }
+          ],
+          "justification": "Require USB Type-C and UCSI support on x86_64 and arm64 - PR: https://github.com/microsoft/azurelinux/pull/18300"
         },
         {
           "name": "CONFIG_UCLAMP_TASK",
@@ -3440,6 +3718,14 @@
             { "architecture": "arm64", "value": "m" }
           ],
           "justification": "Align kernel 6.18 with its generated configuration"
+        },
+        {
+          "name": "CONFIG_PCIE_EDR",
+          "values": [
+            { "architecture": "x86_64", "value": "y" },
+            { "architecture": "arm64", "value": "y" }
+          ],
+          "justification": "Enable PCIe Error Disconnect Recovery for Downstream Port Containment on AZL4"
         },
         {
           "name": "CONFIG_PCI_P2PDMA",

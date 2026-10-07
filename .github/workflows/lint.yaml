@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - toml
+      - 4.0
 
 # Cancel in-progress runs of this workflow if a new run is triggered.
 concurrency:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   lint:
-    name: "Validate TOML config"
+    name: "Lint and validate config"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,9 +29,20 @@ jobs:
           go-version: stable
           cache: false
 
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
       - name: Install azldev
         run: |
           go install "github.com/microsoft/azure-linux-dev-tools/cmd/azldev@$(cat .azldev-version)"
 
+      - name: Install pre-commit
+        run: python -m pip install -r scripts/ci/pre-commit/requirements.txt
+
       - name: "Validate config (strict)"
         run: azldev config dump > /dev/null
+
+      - name: "Run pre-commit checks"
+        run: pre-commit run --all-files --show-diff-on-failure
